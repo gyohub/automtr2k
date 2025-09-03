@@ -1,7 +1,7 @@
 {
   "name": "at2",
   "version": "1.0.0",
-  "description": "CLI tool for automating QIMA project releases with plugin support",
+  "description": "CLI tool for automating project releases with plugin support",
   "main": "dist/src/index.js",
   "bin": {
     "at2": "dist/src/index.js"
@@ -18,10 +18,9 @@
     "cli",
     "release",
     "git",
-    "automation",
-    "qima"
+    "automation"
   ],
-  "author": "QIMA Team",
+  "author": "Development Team",
   "license": "MIT",
   "dependencies": {
     "chalk": "^5.3.0",

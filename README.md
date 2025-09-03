@@ -1,11 +1,11 @@
 # AT2
 
-A powerful Node.js CLI tool for automating QIMA project releases with plugin support. This tool streamlines the release process by automating Git operations while maintaining the critical manual conflict resolution step.
+A powerful Node.js CLI tool for automating project releases with plugin support. This tool streamlines the release process by automating Git operations while maintaining the critical manual conflict resolution step.
 
 ## Features
 
 - 🚀 **Plugin Architecture**: Extensible plugin system for different release workflows
-- 🔄 **Multiple Repository Types**: Support for both standard (develop → master) and QIMACert (develop-qimacert → develop) workflows
+- 🔄 **Multiple Repository Types**: Support for both standard (develop → master) and custom (develop-custom → develop) workflows
 - 📁 **Repository Management**: Easy configuration and management of multiple repositories
 - ⚠️ **Conflict Resolution**: Intelligent handling of merge conflicts with user intervention
 - 🎯 **Interactive CLI**: User-friendly interface with guided workflows
@@ -94,18 +94,18 @@ node dist/src/index.js init
 
 ## Configuration
 
-The CLI uses a YAML configuration file (`qima-release-config.yml`) to store repository information and settings.
+The CLI uses a YAML configuration file (`release-config.yml`) to store repository information and settings.
 
 ### Sample Configuration
 
 ```yaml
 repositories:
-  - name: qimacert
-    path: ./qimacert
+  - name: custom-project
+    path: ./custom-project
     baseBranches:
-      develop: develop-qimacert
+      develop: develop-custom
       production: develop
-      type: qimacert
+      type: custom
   - name: standard-project
     path: ./standard-project
     baseBranches:
@@ -126,10 +126,10 @@ defaultBaseBranches:
 - **Production Branch**: `master`
 - **Flow**: `develop` → `master`
 
-### QIMACert Workflow
-- **Develop Branch**: `develop-qimacert`
+### Custom Workflow
+- **Develop Branch**: `develop-custom`
 - **Production Branch**: `develop`
-- **Flow**: `develop-qimacert` → `develop`
+- **Flow**: `develop-custom` → `develop`
 
 ## Plugin System
 
@@ -142,9 +142,9 @@ The CLI uses a plugin architecture that allows you to extend functionality beyon
    - Creates rollback tags and release branches
    - Manages merge conflicts
 
-2. **QIMACert Release Plugin** (`qimacert-release`)
-   - Handles repositories with develop-qimacert and develop branches
-   - Follows the QIMACert-specific workflow
+2. **Custom Release Plugin** (`custom-release`)
+   - Handles repositories with develop-custom and develop branches
+   - Follows the custom-specific workflow
    - Creates appropriate tags and branches
 
 ### Creating Custom Plugins
