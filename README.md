@@ -36,6 +36,40 @@ npm link
 npm install -g at2
 ```
 
+### Windows PowerShell Setup
+
+If you encounter execution policy errors on Windows PowerShell, you have several options:
+
+#### Option 1: Enable Script Execution (Recommended)
+Open PowerShell as Administrator and run:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+Type "Y" when prompted. This allows signed scripts to run, which is required for npm packages.
+
+#### Option 2: Use Command Prompt
+Use Command Prompt (cmd.exe) instead of PowerShell:
+```cmd
+npm install -g at2
+at2 init
+```
+
+#### Option 3: Use npx (No Installation Required)
+Run the CLI directly without global installation:
+```bash
+npx at2 init
+npx at2 release
+npx at2 config
+npx at2 plugins
+```
+
+#### Option 4: Run Directly from Project
+If you're in the project directory:
+```bash
+npm run build
+node dist/src/index.js init
+```
+
 ## Quick Start
 
 1. **Initialize Configuration**

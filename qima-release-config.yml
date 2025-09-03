@@ -1,4 +1,16 @@
-repositories: []
+repositories:
+  - name: qimacert
+    path: ./qimacert
+    baseBranches:
+      develop: develop-qimacert
+      production: develop
+      type: qimacert
+  - name: standard-project
+    path: ./standard-project
+    baseBranches:
+      develop: develop
+      production: master
+      type: standard
 defaultTag: 1.0.0
 defaultBaseBranches:
   develop: develop
