@@ -1,1 +1,0 @@
-{"version":3,"file":"StandardReleasePlugin.d.ts","sourceRoot":"","sources":["StandardReleasePlugin.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,MAAM,EAAE,aAAa,EAAiB,MAAM,mBAAmB,CAAC;AAGzE,MAAM,CAAC,OAAO,OAAO,qBAAsB,YAAW,MAAM;IAC1D,IAAI,SAAsB;IAC1B,WAAW,SAAgF;IAC3F,OAAO,SAAW;IAEZ,OAAO,CAAC,OAAO,EAAE,aAAa,GAAG,OAAO,CAAC,IAAI,CAAC;CA4ErD"}

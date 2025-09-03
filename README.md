@@ -1,11 +1,14 @@
 # AT2
 
-A powerful Node.js CLI tool for automating project releases with plugin support. This tool streamlines the release process by automating Git operations while maintaining the critical manual conflict resolution step.
+A powerful Node.js CLI tool for general automation with plugin support. This tool streamlines various development operations including Git operations, build processes, deployments, and communications while maintaining extensibility through a robust plugin architecture.
 
 ## Features
 
-- 🚀 **Plugin Architecture**: Extensible plugin system for different release workflows
-- 🔄 **Multiple Repository Types**: Support for both standard (develop → master) and custom (develop-custom → develop) workflows
+- 🚀 **Plugin Architecture**: Extensible plugin system for any type of automation
+- 🔧 **Git Operations**: Clone, pull, push, merge, branch, and tag management
+- 💬 **Communication**: Slack notifications, email, webhooks, and more
+- 🏗️ **Build Automation**: Java (Maven/Gradle), Node.js, Python, Docker builds
+- 🚀 **Deployment**: Multi-environment deployment with rollback support
 - 📁 **Repository Management**: Easy configuration and management of multiple repositories
 - ⚠️ **Conflict Resolution**: Intelligent handling of merge conflicts with user intervention
 - 🎯 **Interactive CLI**: User-friendly interface with guided workflows
@@ -77,24 +80,49 @@ node dist/src/index.js init
    at2 init
    ```
 
-2. **Start Release Process**
+2. **Run Automation Tasks**
    ```bash
-   at2 release
+   at2 run
    ```
 
-3. **Manage Configuration**
+3. **Git Operations**
+   ```bash
+   at2 git
+   ```
+
+4. **Build Operations**
+   ```bash
+   at2 build
+   ```
+
+5. **Deployment Operations**
+   ```bash
+   at2 deploy
+   ```
+
+6. **Send Notifications**
+   ```bash
+   at2 notify
+   ```
+
+7. **Manage Configuration**
    ```bash
    at2 config
    ```
 
-4. **List Available Plugins**
+8. **List Available Plugins**
    ```bash
    at2 plugins
    ```
 
+9. **Legacy Release Process**
+   ```bash
+   at2 release
+   ```
+
 ## Configuration
 
-The CLI uses a YAML configuration file (`release-config.yml`) to store repository information and settings.
+The CLI uses a YAML configuration file (`automation-config.yml`) to store repository information, plugin settings, environments, and integrations.
 
 ### Sample Configuration
 
@@ -102,16 +130,56 @@ The CLI uses a YAML configuration file (`release-config.yml`) to store repositor
 repositories:
   - name: custom-project
     path: ./custom-project
+    type: git
+    url: https://github.com/example/custom-project.git
     baseBranches:
       develop: develop-custom
       production: develop
       type: custom
   - name: standard-project
     path: ./standard-project
+    type: git
+    url: https://github.com/example/standard-project.git
     baseBranches:
       develop: develop
       production: master
       type: standard
+
+plugins:
+  - name: git-clone
+    enabled: true
+    settings: { defaultBranch: 'main' }
+  - name: slack-notification
+    enabled: true
+    settings: { defaultChannel: '#general' }
+  - name: java-build
+    enabled: true
+    settings: { mavenCommand: 'mvn clean install' }
+
+environments:
+  - name: development
+    type: development
+    variables: { NODE_ENV: 'development' }
+    repositories: ['custom-project']
+  - name: staging
+    type: staging
+    variables: { NODE_ENV: 'staging' }
+    repositories: ['standard-project']
+  - name: production
+    type: production
+    variables: { NODE_ENV: 'production' }
+    repositories: ['standard-project']
+
+integrations:
+  slack:
+    enabled: false
+    channels: ['#general']
+    defaultChannel: '#general'
+  github:
+    enabled: false
+  jira:
+    enabled: false
+
 defaultTag: "1.0.0"
 defaultBaseBranches:
   develop: develop
@@ -119,24 +187,72 @@ defaultBaseBranches:
   type: standard
 ```
 
-## Repository Types
+## Plugin Categories
 
-### Standard Workflow
-- **Develop Branch**: `develop`
-- **Production Branch**: `master`
-- **Flow**: `develop` → `master`
+The CLI supports various categories of plugins to handle different types of automation:
 
-### Custom Workflow
-- **Develop Branch**: `develop-custom`
-- **Production Branch**: `develop`
-- **Flow**: `develop-custom` → `develop`
+### 🔧 Git Operations
+- **Clone Repository**: Clone repositories with specific branches
+- **Pull Changes**: Update local repositories with remote changes
+- **Push Changes**: Push local changes to remote repositories
+- **Create Branch**: Create new branches for development
+- **Create Pull Request**: Automate pull request creation
+- **Merge Branch**: Merge branches with conflict resolution
+- **Create Tag**: Create and push version tags
+
+### 💬 Communication
+- **Slack Notifications**: Send messages to Slack channels
+- **Email Notifications**: Send email notifications
+- **Webhook Calls**: Trigger webhooks with custom payloads
+- **Jira Integration**: Create and update Jira tickets
+
+### 🏗️ Build Operations
+- **Java (Maven)**: Build Java applications with Maven
+- **Java (Gradle)**: Build Java applications with Gradle
+- **Node.js**: Build Node.js applications
+- **Python**: Build Python applications
+- **Docker**: Build Docker containers
+- **Custom Builds**: Execute custom build scripts
+
+### 🚀 Deployment Operations
+- **Standard Release**: Release process for develop → master workflow
+- **Custom Release**: Release process for custom branch workflows
+- **Environment Deployment**: Deploy to specific environments
+- **Rollback**: Rollback deployments to previous versions
+
+### 🛠️ Utility Operations
+- **File Operations**: Copy, move, and manage files
+- **Database Operations**: Database migrations and backups
+- **System Commands**: Execute system commands
+- **Custom Scripts**: Run custom automation scripts
+
+### 🎯 Custom Operations
+- **Custom Plugins**: Implement any custom automation logic
+- **Integration Plugins**: Connect with external systems
+- **Workflow Plugins**: Orchestrate complex workflows
 
 ## Plugin System
 
-The CLI uses a plugin architecture that allows you to extend functionality beyond the built-in release processes.
+The CLI uses a plugin architecture that allows you to extend functionality for any type of automation. Plugins are organized by categories and can be easily created and managed.
 
 ### Built-in Plugins
 
+#### 🔧 Git Operations
+1. **Git Clone Plugin** (`git-clone`)
+   - Clone repositories with specific branches
+   - Supports custom target paths and branch selection
+
+#### 💬 Communication
+1. **Slack Notification Plugin** (`slack-notification`)
+   - Send messages to Slack channels
+   - Supports webhook URLs and custom channels
+
+#### 🏗️ Build Operations
+1. **Java Build Plugin** (`java-build`)
+   - Build Java applications with Maven or Gradle
+   - Supports custom build targets and project paths
+
+#### 🚀 Deployment Operations
 1. **Standard Release Plugin** (`standard-release`)
    - Handles repositories with develop and master branches
    - Creates rollback tags and release branches
@@ -147,23 +263,45 @@ The CLI uses a plugin architecture that allows you to extend functionality beyon
    - Follows the custom-specific workflow
    - Creates appropriate tags and branches
 
+#### 🛠️ Utility Operations
+1. **Example Plugin** (`example-plugin`)
+   - Demonstrates plugin system capabilities
+   - Shows how to create custom plugins
+
 ### Creating Custom Plugins
 
 To create a custom plugin, implement the `Plugin` interface:
 
 ```typescript
-import { Plugin, PluginContext } from '../src/types';
+import { Plugin, PluginContext, PluginCategory } from '../src/types';
 
 export default class CustomPlugin implements Plugin {
   name = 'custom-plugin';
   description = 'Description of your custom plugin';
   version = '1.0.0';
+  category = PluginCategory.CUSTOM; // Choose appropriate category
 
   async execute(context: PluginContext): Promise<void> {
     // Your custom logic here
-    const { projectFolder, tagName, baseBranches, options } = context;
+    const { projectFolder, parameters, options } = context;
+    
+    // Access parameters passed from CLI
+    const { customParam1, customParam2 } = parameters || {};
     
     // Implement your workflow
+    console.log('Executing custom plugin...');
+    
+    // Example: Execute a system command
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+    
+    try {
+      const { stdout } = await execAsync('your-command-here');
+      console.log('Command output:', stdout);
+    } catch (error) {
+      throw new Error(`Custom plugin failed: ${error}`);
+    }
   }
 }
 ```

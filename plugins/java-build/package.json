@@ -1,0 +1,13 @@
+{
+  "name": "at2-java-build-plugin",
+  "version": "1.0.0",
+  "description": "Java Build plugin for AT2 automation CLI",
+  "main": "index.js",
+  "keywords": ["at2", "plugin", "java", "build", "maven", "gradle"],
+  "author": "Development Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "fs-extra": "^11.2.0"
+  }
+}

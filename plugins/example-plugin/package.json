@@ -1,0 +1,9 @@
+{
+  "name": "at2-example-plugin",
+  "version": "1.0.0",
+  "description": "Example plugin for AT2 automation CLI",
+  "main": "index.js",
+  "keywords": ["at2", "plugin", "example", "utility"],
+  "author": "Development Team",
+  "license": "MIT"
+}

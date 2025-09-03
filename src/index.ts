@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { ReleaseCLI } from './cli/ReleaseCLI';
+import { AutomationCLI } from './cli/ReleaseCLI';
 
 async function main() {
   try {
-    const cli = new ReleaseCLI();
+    const cli = new AutomationCLI();
     await cli.run();
   } catch (error) {
     console.error('❌ Fatal error:', error);

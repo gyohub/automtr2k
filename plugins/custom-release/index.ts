@@ -1,15 +1,28 @@
-import { Plugin, PluginContext, ReleaseResult } from '../src/types';
-import { GitManager } from '../src/core/GitManager';
+import { Plugin, PluginContext, ReleaseResult, PluginCategory } from '../../src/types';
+import { GitManager } from '../../src/core/GitManager';
 
-export default class StandardReleasePlugin implements Plugin {
-  name = 'standard-release';
-  description = 'Standard release process for repositories with develop and master branches';
+export default class CustomReleasePlugin implements Plugin {
+  name = 'custom-release';
+  description = 'Custom release process for repositories with develop-custom and develop branches';
   version = '1.0.0';
+  category = PluginCategory.DEPLOYMENT;
 
   async execute(context: PluginContext): Promise<void> {
     const { projectFolder, tagName, baseBranches } = context;
     
-    console.log(`🚀 Starting standard release process for: ${projectFolder}`);
+    if (!projectFolder) {
+      throw new Error('Project folder is required');
+    }
+    
+    if (!tagName) {
+      throw new Error('Tag name is required');
+    }
+    
+    if (!baseBranches) {
+      throw new Error('Base branches configuration is required');
+    }
+    
+    console.log(`🚀 Starting custom release process for: ${projectFolder}`);
     console.log(`📝 Tag: ${tagName}`);
     console.log(`🌿 Base branches: ${baseBranches.develop} → ${baseBranches.production}`);
     console.log('==============================================================');
@@ -21,7 +34,7 @@ export default class StandardReleasePlugin implements Plugin {
       // Step 1: Fetch and update
       await gitManager.fetchAndUpdate(baseBranches);
 
-      // Step 2: Checkout and pull develop
+      // Step 2: Checkout and pull develop-custom
       await gitManager.checkoutBranch(baseBranches.develop);
       await gitManager.pullBranch(baseBranches.develop);
 
@@ -31,16 +44,16 @@ export default class StandardReleasePlugin implements Plugin {
       await gitManager.pushTag(rollbackTag);
       result.rollbackTag = rollbackTag;
 
-      // Step 4: Create release branch from develop
+      // Step 4: Create release branch from develop-custom
       const releaseBranch = `release_${baseBranches.develop}_${tagName}`;
       await gitManager.createBranch(releaseBranch, baseBranches.develop);
       result.releaseBranch = releaseBranch;
 
-      // Step 5: Checkout master and pull
+      // Step 5: Checkout develop and pull
       await gitManager.checkoutBranch(baseBranches.production);
       await gitManager.pullBranch(baseBranches.production);
 
-      // Step 6: Merge master into release branch
+      // Step 6: Merge develop into release branch
       await gitManager.checkoutBranch(releaseBranch);
       const mergeSuccess = await gitManager.mergeBranch(baseBranches.production);
 
@@ -49,7 +62,7 @@ export default class StandardReleasePlugin implements Plugin {
       }
 
       // Step 7: Create version tag
-      const versionTag = `v_${projectFolder}_${tagName}`;
+      const versionTag = `v_custom_${tagName}`;
       await gitManager.createTag(versionTag);
       await gitManager.pushTag(versionTag);
       result.versionTag = versionTag;
@@ -66,7 +79,7 @@ export default class StandardReleasePlugin implements Plugin {
       result.success = true;
 
       console.log('==============================================================');
-      console.log('✅ Standard release process completed successfully!');
+      console.log('✅ Custom release process completed successfully!');
       console.log('');
       console.log('Summary:');
       console.log(`- Rollback tag: ${result.rollbackTag}`);
@@ -78,7 +91,7 @@ export default class StandardReleasePlugin implements Plugin {
 
     } catch (error) {
       result.error = error instanceof Error ? error.message : String(error);
-      console.error('❌ Standard release process failed:', error);
+      console.error('❌ Custom release process failed:', error);
       throw error;
     }
   }

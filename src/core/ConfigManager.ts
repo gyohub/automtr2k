@@ -1,20 +1,42 @@
-import { Repository, ReleaseConfig, BaseBranches } from '../types';
+import { Repository, AutomationConfig, BaseBranches, PluginConfig, EnvironmentConfig, IntegrationConfig } from '../types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as yaml from 'yaml';
 
 export class ConfigManager {
   private configPath: string;
-  private config: ReleaseConfig;
+  private config: AutomationConfig;
 
-  constructor(configPath: string = './qima-release-config.yml') {
+  constructor(configPath: string = './automation-config.yml') {
     this.configPath = configPath;
     this.config = this.getDefaultConfig();
   }
 
-  private getDefaultConfig(): ReleaseConfig {
+  private getDefaultConfig(): AutomationConfig {
     return {
       repositories: [],
+      plugins: [],
+      environments: [
+        {
+          name: 'development',
+          type: 'development',
+          variables: {},
+          repositories: []
+        },
+        {
+          name: 'staging',
+          type: 'staging',
+          variables: {},
+          repositories: []
+        },
+        {
+          name: 'production',
+          type: 'production',
+          variables: {},
+          repositories: []
+        }
+      ],
+      integrations: {},
       defaultTag: '1.0.0',
       defaultBaseBranches: {
         develop: 'develop',
@@ -50,6 +72,7 @@ export class ConfigManager {
     }
   }
 
+  // Repository management
   getRepositories(): Repository[] {
     return this.config.repositories;
   }
@@ -80,6 +103,64 @@ export class ConfigManager {
     }
   }
 
+  // Plugin management
+  getPlugins(): PluginConfig[] {
+    return this.config.plugins;
+  }
+
+  addPlugin(plugin: PluginConfig): void {
+    const existingIndex = this.config.plugins.findIndex(p => p.name === plugin.name);
+    if (existingIndex >= 0) {
+      this.config.plugins[existingIndex] = plugin;
+    } else {
+      this.config.plugins.push(plugin);
+    }
+  }
+
+  removePlugin(pluginName: string): boolean {
+    const initialLength = this.config.plugins.length;
+    this.config.plugins = this.config.plugins.filter(p => p.name !== pluginName);
+    return this.config.plugins.length < initialLength;
+  }
+
+  getPlugin(pluginName: string): PluginConfig | undefined {
+    return this.config.plugins.find(p => p.name === pluginName);
+  }
+
+  // Environment management
+  getEnvironments(): EnvironmentConfig[] {
+    return this.config.environments;
+  }
+
+  addEnvironment(env: EnvironmentConfig): void {
+    const existingIndex = this.config.environments.findIndex(e => e.name === env.name);
+    if (existingIndex >= 0) {
+      this.config.environments[existingIndex] = env;
+    } else {
+      this.config.environments.push(env);
+    }
+  }
+
+  removeEnvironment(envName: string): boolean {
+    const initialLength = this.config.environments.length;
+    this.config.environments = this.config.environments.filter(e => e.name !== envName);
+    return this.config.environments.length < initialLength;
+  }
+
+  getEnvironment(envName: string): EnvironmentConfig | undefined {
+    return this.config.environments.find(e => e.name === envName);
+  }
+
+  // Integration management
+  getIntegrations(): IntegrationConfig {
+    return this.config.integrations;
+  }
+
+  updateIntegrations(integrations: IntegrationConfig): void {
+    this.config.integrations = { ...this.config.integrations, ...integrations };
+  }
+
+  // Legacy methods for backward compatibility
   getDefaultTag(): string {
     return this.config.defaultTag || '1.0.0';
   }
@@ -100,48 +181,109 @@ export class ConfigManager {
     this.config.defaultBaseBranches = baseBranches;
   }
 
-  async createSampleConfig(): Promise<void> {
-    const sampleRepos: Repository[] = [
-      {
-        name: 'qimacert',
-        path: './qimacert',
-        baseBranches: {
-          develop: 'develop-qimacert',
-          production: 'develop',
-          type: 'qimacert'
-        }
-      },
-      {
-        name: 'standard-project',
-        path: './standard-project',
-        baseBranches: {
-          develop: 'develop',
-          production: 'master',
-          type: 'standard'
-        }
-      }
-    ];
-
-    this.config.repositories = sampleRepos;
-    await this.saveConfig();
-    console.log('✅ Sample configuration created with example repositories');
-  }
-
+  // Configuration management
   listRepositories(): void {
     if (this.config.repositories.length === 0) {
-      console.log('No repositories configured');
+      console.log('No repositories configured.');
       return;
     }
 
     console.log('\n📁 Configured Repositories:');
-    console.log('============================');
-    
+    console.log('==========================');
     this.config.repositories.forEach((repo, index) => {
       const lastUsed = repo.lastUsed ? ` (Last used: ${repo.lastUsed.toLocaleDateString()})` : '';
       console.log(`${index + 1}. ${repo.name} - ${repo.path}${lastUsed}`);
-      console.log(`   Type: ${repo.baseBranches.type}`);
-      console.log(`   Branches: ${repo.baseBranches.develop} → ${repo.baseBranches.production}`);
-      console.log('');
+      if (repo.type) console.log(`   Type: ${repo.type}`);
+      if (repo.url) console.log(`   URL: ${repo.url}`);
     });
+  }
+
+  listPlugins(): void {
+    if (this.config.plugins.length === 0) {
+      console.log('No plugins configured.');
+      return;
+    }
+
+    console.log('\n🔌 Configured Plugins:');
+    console.log('======================');
+    this.config.plugins.forEach((plugin, index) => {
+      const status = plugin.enabled ? '✅ Enabled' : '❌ Disabled';
+      console.log(`${index + 1}. ${plugin.name} - ${status}`);
+    });
+  }
+
+  listEnvironments(): void {
+    if (this.config.environments.length === 0) {
+      console.log('No environments configured.');
+      return;
+    }
+
+    console.log('\n🌍 Configured Environments:');
+    console.log('============================');
+    this.config.environments.forEach((env, index) => {
+      console.log(`${index + 1}. ${env.name} (${env.type})`);
+      console.log(`   Repositories: ${env.repositories.join(', ') || 'None'}`);
+    });
+  }
+
+  async createSampleConfig(): Promise<void> {
+    // Add sample repositories
+    this.addRepository({
+      name: 'custom-project',
+      path: './custom-project',
+      type: 'git',
+      url: 'https://github.com/example/custom-project.git',
+      baseBranches: {
+        develop: 'develop-custom',
+        production: 'develop',
+        type: 'custom'
+      }
+    });
+
+    this.addRepository({
+      name: 'standard-project',
+      path: './standard-project',
+      type: 'git',
+      url: 'https://github.com/example/standard-project.git',
+      baseBranches: {
+        develop: 'develop',
+        production: 'master',
+        type: 'standard'
+      }
+    });
+
+    // Add sample plugins
+    this.addPlugin({
+      name: 'git-clone',
+      enabled: true,
+      settings: { defaultBranch: 'main' }
+    });
+
+    this.addPlugin({
+      name: 'slack-notification',
+      enabled: true,
+      settings: { defaultChannel: '#general' }
+    });
+
+    this.addPlugin({
+      name: 'java-build',
+      enabled: true,
+      settings: { mavenCommand: 'mvn clean install' }
+    });
+
+    // Add sample integrations
+    this.updateIntegrations({
+      slack: {
+        enabled: false,
+        channels: ['#general'],
+        defaultChannel: '#general'
+      },
+      github: {
+        enabled: false
+      }
+    });
+
+    await this.saveConfig();
+    console.log('✅ Sample configuration created with example repositories, plugins, and integrations');
   }
 }

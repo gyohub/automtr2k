@@ -1,0 +1,58 @@
+repositories:
+  - name: custom-project
+    path: ./custom-project
+    type: git
+    url: https://github.com/example/custom-project.git
+    baseBranches:
+      develop: develop-custom
+      production: develop
+      type: custom
+    lastUsed: 2025-09-03T19:23:38.054Z
+  - name: standard-project
+    path: ./standard-project
+    type: git
+    url: https://github.com/example/standard-project.git
+    baseBranches:
+      develop: develop
+      production: master
+      type: standard
+    lastUsed: 2025-09-03T19:23:38.054Z
+plugins:
+  - name: git-clone
+    enabled: true
+    settings:
+      defaultBranch: main
+  - name: slack-notification
+    enabled: true
+    settings:
+      defaultChannel: "#general"
+  - name: java-build
+    enabled: true
+    settings:
+      mavenCommand: mvn clean install
+environments:
+  - name: development
+    type: development
+    variables: {}
+    repositories: []
+  - name: staging
+    type: staging
+    variables: {}
+    repositories: []
+  - name: production
+    type: production
+    variables: {}
+    repositories: []
+integrations:
+  slack:
+    enabled: false
+    channels:
+      - "#general"
+    defaultChannel: "#general"
+  github:
+    enabled: false
+defaultTag: 1.0.0
+defaultBaseBranches:
+  develop: develop
+  production: master
+  type: standard

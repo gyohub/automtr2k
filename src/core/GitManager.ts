@@ -40,7 +40,7 @@ export class GitManager {
       console.log('📥 Fetching latest changes...');
       await this.git.fetch(['--prune']);
       
-      if (baseBranches.type === 'qimacert') {
+      if (baseBranches.type === 'custom') {
         await this.git.fetch([
           'origin',
           `${baseBranches.develop}:${baseBranches.develop}`,
