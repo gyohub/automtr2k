@@ -1,0 +1,6 @@
+repositories: []
+defaultTag: 1.0.0
+defaultBaseBranches:
+  develop: develop
+  production: master
+  type: standard

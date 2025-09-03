@@ -1,0 +1,1 @@
+{"version":3,"file":"QimacertReleasePlugin.d.ts","sourceRoot":"","sources":["QimacertReleasePlugin.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,MAAM,EAAE,aAAa,EAAiB,MAAM,mBAAmB,CAAC;AAGzE,MAAM,CAAC,OAAO,OAAO,qBAAsB,YAAW,MAAM;IAC1D,IAAI,SAAsB;IAC1B,WAAW,SAA0F;IACrG,OAAO,SAAW;IAEZ,OAAO,CAAC,OAAO,EAAE,aAAa,GAAG,OAAO,CAAC,IAAI,CAAC;CA4ErD"}
