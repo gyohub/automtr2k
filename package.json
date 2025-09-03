@@ -1,10 +1,10 @@
 {
-  "name": "automator2000",
+  "name": "at2",
   "version": "1.0.0",
   "description": "CLI tool for automating QIMA project releases with plugin support",
   "main": "dist/src/index.js",
   "bin": {
-    "automator2000": "dist/src/index.js"
+    "at2": "dist/src/index.js"
   },
   "scripts": {
     "build": "tsc",

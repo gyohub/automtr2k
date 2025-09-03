@@ -1,4 +1,4 @@
-# Automator2000
+# AT2
 
 A powerful Node.js CLI tool for automating QIMA project releases with plugin support. This tool streamlines the release process by automating Git operations while maintaining the critical manual conflict resolution step.
 
@@ -18,7 +18,7 @@ A powerful Node.js CLI tool for automating QIMA project releases with plugin sup
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd automator2000
+cd at2
 
 # Install dependencies
 npm install
@@ -33,29 +33,29 @@ npm link
 ### As NPM Package (when published)
 
 ```bash
-npm install -g automator2000
+npm install -g at2
 ```
 
 ## Quick Start
 
 1. **Initialize Configuration**
    ```bash
-   automator2000 init
+   at2 init
    ```
 
 2. **Start Release Process**
    ```bash
-   automator2000 release
+   at2 release
    ```
 
 3. **Manage Configuration**
    ```bash
-   automator2000 config
+   at2 config
    ```
 
 4. **List Available Plugins**
    ```bash
-   automator2000 plugins
+   at2 plugins
    ```
 
 ## Configuration

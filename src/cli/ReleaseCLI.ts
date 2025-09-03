@@ -22,7 +22,7 @@ export class ReleaseCLI {
 
   private setupCommands(): void {
     this.program
-      .name('automator2000')
+      .name('at2')
       .description('CLI tool for automating QIMA project releases')
       .version('1.0.0');
 
