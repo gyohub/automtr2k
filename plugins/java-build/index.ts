@@ -1,4 +1,4 @@
-import { Plugin, PluginContext, PluginCategory } from '../../src/types';
+import { Plugin, PluginContext, PluginCategory, ConfigMenu } from '../../src/types';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import chalk from 'chalk';
@@ -12,6 +12,72 @@ export default class JavaBuildPlugin implements Plugin {
   description = 'Build Java applications using Maven or Gradle';
   version = '1.0.0';
   category = PluginCategory.BUILD;
+
+  getConfigMenu(): ConfigMenu {
+    return {
+      title: 'Java Build Configuration',
+      description: 'Configure build tool preferences, default targets, and project settings',
+      options: [
+        {
+          key: 'defaultBuildTool',
+          label: 'Default Build Tool',
+          description: 'Preferred build tool (Maven or Gradle)',
+          type: 'select',
+          choices: ['maven', 'gradle'],
+          default: 'maven'
+        },
+        {
+          key: 'mavenCommand',
+          label: 'Maven Command',
+          description: 'Maven command to use (e.g., mvn, mvnw)',
+          type: 'input',
+          default: 'mvn'
+        },
+        {
+          key: 'gradleCommand',
+          label: 'Gradle Command',
+          description: 'Gradle command to use (e.g., gradle, ./gradlew)',
+          type: 'input',
+          default: './gradlew'
+        },
+        {
+          key: 'defaultTarget',
+          label: 'Default Build Target',
+          description: 'Default Maven/Gradle target (e.g., clean install)',
+          type: 'input',
+          default: 'clean install'
+        },
+        {
+          key: 'skipTests',
+          label: 'Skip Tests',
+          description: 'Skip running tests during build',
+          type: 'boolean',
+          default: false
+        },
+        {
+          key: 'parallelBuild',
+          label: 'Parallel Build',
+          description: 'Enable parallel build execution',
+          type: 'boolean',
+          default: true
+        },
+        {
+          key: 'buildTimeout',
+          label: 'Build Timeout (minutes)',
+          description: 'Maximum time to wait for build completion',
+          type: 'input',
+          default: '30',
+          validation: (value: string) => {
+            const num = parseInt(value);
+            if (isNaN(num) || num <= 0) {
+              return 'Timeout must be a positive number';
+            }
+            return null;
+          }
+        }
+      ]
+    };
+  }
 
   async execute(context: PluginContext): Promise<void> {
     const { buildType, target, projectPath } = context.parameters || {};

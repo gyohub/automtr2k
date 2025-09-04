@@ -4,13 +4,14 @@ export interface Plugin {
   version: string;
   category: PluginCategory;
   execute: (context: PluginContext) => Promise<void>;
+  getConfigMenu?: () => ConfigMenu; // Optional configuration menu
 }
 
 export enum PluginCategory {
   GIT = 'git',
   COMMUNICATION = 'communication',
   BUILD = 'build',
-  DEPLOYMENT = 'deployment',
+  RELEASE = 'release',
   UTILITY = 'utility',
   CUSTOM = 'custom'
 }
@@ -55,17 +56,10 @@ export interface Repository {
 
 export interface AutomationConfig {
   repositories: Repository[];
-  plugins: PluginConfig[];
   environments: EnvironmentConfig[];
   integrations: IntegrationConfig;
   defaultTag?: string;
   defaultBaseBranches?: BaseBranches;
-}
-
-export interface PluginConfig {
-  name: string;
-  enabled: boolean;
-  settings: Record<string, any>;
 }
 
 export interface EnvironmentConfig {
@@ -181,4 +175,26 @@ export interface DeploymentResult extends AutomationResult {
   target: string;
   deployedAt: Date;
   rollbackAvailable: boolean;
+}
+
+// Configuration Menu Types
+export interface ConfigMenu {
+  title: string;
+  description: string;
+  options: ConfigMenuOption[];
+}
+
+export interface ConfigMenuOption {
+  key: string;
+  label: string;
+  description: string;
+  type: 'input' | 'select' | 'boolean' | 'multiselect' | 'file';
+  required?: boolean;
+  default?: any;
+  choices?: string[]; // For select/multiselect types
+  validation?: (value: any) => string | null; // Returns error message or null if valid
+}
+
+export interface PluginSettings {
+  [key: string]: any;
 }

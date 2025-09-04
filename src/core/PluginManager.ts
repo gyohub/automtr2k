@@ -164,7 +164,7 @@ export class PluginManager {
         return '💬';
       case PluginCategory.BUILD:
         return '🏗️';
-      case PluginCategory.DEPLOYMENT:
+      case PluginCategory.RELEASE:
         return '🚀';
       case PluginCategory.UTILITY:
         return '🛠️';

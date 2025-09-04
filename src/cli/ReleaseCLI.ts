@@ -96,7 +96,7 @@ export class AutomationCLI {
           { name: '🔧 Git Operations (clone, pull, push, etc.)', value: PluginCategory.GIT },
           { name: '💬 Communication (Slack, email, etc.)', value: PluginCategory.COMMUNICATION },
           { name: '🏗️ Build Operations (Java, Node.js, etc.)', value: PluginCategory.BUILD },
-          { name: '🚀 Deployment Operations', value: PluginCategory.DEPLOYMENT },
+          { name: '🚀 Release Operations', value: PluginCategory.RELEASE },
           { name: '🛠️ Utility Operations', value: PluginCategory.UTILITY },
           { name: '🎯 Custom Operations', value: PluginCategory.CUSTOM }
         ]
@@ -133,7 +133,7 @@ export class AutomationCLI {
     }
 
     // Get context based on plugin category
-    const context = await this.buildPluginContext(plugin, category);
+    const context = await this.buildPluginContext(plugin, category, selectedPlugin);
     
     const spinner = ora(`Executing ${plugin.name}...`).start();
     
@@ -145,7 +145,7 @@ export class AutomationCLI {
     }
   }
 
-  private async buildPluginContext(plugin: any, category: PluginCategory): Promise<PluginContext> {
+  private async buildPluginContext(plugin: any, category: PluginCategory, pluginName: string): Promise<PluginContext> {
     const context: PluginContext = {
       options: {},
       parameters: {}
@@ -203,11 +203,32 @@ export class AutomationCLI {
         context.parameters = { buildType, target };
         break;
 
-      case PluginCategory.DEPLOYMENT:
-        const environment = await this.selectEnvironment();
-        if (environment) {
-          context.environment = environment.name;
-          context.parameters = environment.variables;
+      case PluginCategory.RELEASE:
+        // Check if this is a simple deployment plugin that doesn't need environment
+        if (pluginName === 'qima-legacy-release' || pluginName === 'qima-release') {
+          // For qima-legacy-release, we need repository and version
+          const repository = await this.selectRepository();
+          if (repository) {
+            context.selectedRepository = repository;
+            context.projectFolder = repository.path;
+          }
+          
+          const { version } = await inquirer.prompt([
+            {
+              type: 'input',
+              name: 'version',
+              message: 'Enter version number (e.g., v2.02):',
+              validate: (input: string) => input.trim() ? true : 'Version cannot be empty'
+            }
+          ]);
+          context.parameters = { version };
+        } else {
+          // For other deployment plugins, ask for environment
+          const environment = await this.selectEnvironment();
+          if (environment) {
+            context.environment = environment.name;
+            context.parameters = environment.variables;
+          }
         }
         break;
 
@@ -261,8 +282,8 @@ export class AutomationCLI {
   }
 
   private async deployOperations(): Promise<void> {
-    console.log(chalk.blue.bold('🚀 Deployment Operations'));
-    await this.executeCategoryOperations(PluginCategory.DEPLOYMENT);
+          console.log(chalk.blue.bold('🚀 Release Operations'));
+          await this.executeCategoryOperations(PluginCategory.RELEASE);
   }
 
   private async notifyOperations(): Promise<void> {
@@ -340,25 +361,93 @@ export class AutomationCLI {
     console.log(chalk.gray('Starting release process...\n'));
 
     try {
-      const repository = await this.selectRepository();
-      if (!repository) {
-        console.log(chalk.yellow('No repository selected. Exiting.'));
+      // Check if we have any release plugins available
+      const releasePlugins = this.pluginManager.getPluginsByCategory(PluginCategory.RELEASE);
+      
+      if (releasePlugins.length === 0) {
+        console.log(chalk.yellow('No release plugins available.'));
+        console.log(chalk.cyan('Please use the "run" command to access available automation plugins.'));
         return;
       }
 
-      const tagName = await this.getTagName();
-      if (!tagName) {
-        console.log(chalk.yellow('No tag name provided. Exiting.'));
+      // If we have multiple release plugins, let the user choose
+      let selectedPlugin;
+      if (releasePlugins.length === 1) {
+        selectedPlugin = releasePlugins[0];
+        console.log(chalk.cyan(`Using plugin: ${selectedPlugin.name}`));
+      } else {
+        const { pluginChoice } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'pluginChoice',
+            message: 'Select release plugin:',
+            choices: releasePlugins.map(plugin => ({
+              name: `${plugin.name} - ${plugin.description}`,
+              value: plugin.name
+            }))
+          }
+        ]);
+        selectedPlugin = this.pluginManager.getPlugin(pluginChoice);
+      }
+
+      if (!selectedPlugin) {
+        console.log(chalk.red('No plugin selected. Exiting.'));
         return;
       }
 
-      const confirmed = await this.confirmRelease(repository, tagName);
-      if (!confirmed) {
-        console.log(chalk.yellow('Release cancelled.'));
-        return;
-      }
+      // For QIMA plugins, we need repository and version
+      if (selectedPlugin.name === 'qima-release' || selectedPlugin.name === 'qima-legacy-release') {
+        const repository = await this.selectRepository();
+        if (!repository) {
+          console.log(chalk.yellow('No repository selected. Exiting.'));
+          return;
+        }
 
-      await this.executeRelease(repository, tagName);
+        const { version } = await inquirer.prompt([
+          {
+            type: 'input',
+            name: 'version',
+            message: 'Enter version number (e.g., v2.02):',
+            validate: (input: string) => input.trim() ? true : 'Version cannot be empty'
+          }
+        ]);
+
+        const context: PluginContext = {
+          projectFolder: repository.path,
+          selectedRepository: repository,
+          parameters: { version },
+          options: {}
+        };
+
+        const spinner = ora(`Executing ${selectedPlugin.name}...`).start();
+        try {
+          await this.pluginManager.executePlugin(selectedPlugin.name, context);
+          spinner.succeed(`${selectedPlugin.name} completed successfully!`);
+        } catch (error) {
+          spinner.fail(`${selectedPlugin.name} failed: ${error}`);
+        }
+      } else {
+        // For other plugins, use the standard release flow
+        const repository = await this.selectRepository();
+        if (!repository) {
+          console.log(chalk.yellow('No repository selected. Exiting.'));
+          return;
+        }
+
+        const tagName = await this.getTagName();
+        if (!tagName) {
+          console.log(chalk.yellow('No tag name provided. Exiting.'));
+          return;
+        }
+
+        const confirmed = await this.confirmRelease(repository, tagName);
+        if (!confirmed) {
+          console.log(chalk.yellow('Release cancelled.'));
+          return;
+        }
+
+        await this.executeRelease(repository, tagName);
+      }
 
     } catch (error) {
       console.error(chalk.red('❌ Release process failed:'), error);
@@ -420,14 +509,20 @@ export class AutomationCLI {
         throw new Error(`Repository path does not exist: ${repository.path}`);
       }
 
-      const pluginName = repository.baseBranches?.type === 'custom' 
-        ? 'custom-release' 
-        : 'standard-release';
+      // Find available release plugins dynamically
+      const releasePlugins = this.pluginManager.getPluginsByCategory(PluginCategory.RELEASE);
+      
+      if (releasePlugins.length === 0) {
+        spinner.fail('No release plugins available');
+        throw new Error('No release plugins available');
+      }
 
-      const plugin = this.pluginManager.getPlugin(pluginName);
-      if (!plugin) {
-        spinner.fail(`Plugin not found: ${pluginName}`);
-        throw new Error(`Plugin not found: ${pluginName}`);
+      // For legacy compatibility, try to find qima-release or qima-legacy-release first
+      let selectedPlugin = releasePlugins.find(p => p.name === 'qima-release' || p.name === 'qima-legacy-release');
+      
+      if (!selectedPlugin) {
+        // If no QIMA plugins found, use the first available release plugin
+        selectedPlugin = releasePlugins[0];
       }
 
       spinner.succeed('Release prepared successfully');
@@ -439,7 +534,7 @@ export class AutomationCLI {
         options: {}
       };
 
-      await this.pluginManager.executePlugin(pluginName, context);
+      await this.pluginManager.executePlugin(selectedPlugin.name, context);
 
       console.log(chalk.green.bold('\n🎉 Release completed successfully!'));
 
@@ -460,6 +555,7 @@ export class AutomationCLI {
           { name: 'Add repository', value: 'add-repo' },
           { name: 'Remove repository', value: 'remove-repo' },
           { name: 'List plugins', value: 'list-plugins' },
+          { name: 'Configure plugins', value: 'configure-plugins' },
           { name: 'List environments', value: 'list-environments' },
           { name: 'Configure integrations', value: 'integrations' },
           { name: 'Create sample config', value: 'sample' },
@@ -479,7 +575,10 @@ export class AutomationCLI {
         await this.removeRepository();
         break;
       case 'list-plugins':
-        this.configManager.listPlugins();
+        this.pluginManager.listPlugins();
+        break;
+      case 'configure-plugins':
+        await this.configurePlugins();
         break;
       case 'list-environments':
         this.configManager.listEnvironments();
@@ -603,6 +702,64 @@ export class AutomationCLI {
       console.log(chalk.cyan('You can now use the "config" command to manage repositories and plugins.'));
     } catch (error) {
       console.error(chalk.red('❌ Failed to initialize configuration:'), error);
+    }
+  }
+
+  private async configurePlugins(): Promise<void> {
+    const plugins = this.pluginManager.getAllPlugins();
+    
+    if (plugins.length === 0) {
+      console.log(chalk.yellow('No plugins available.'));
+      return;
+    }
+
+    console.log(chalk.blue('\n🔌 Available Plugins:'));
+    console.log(chalk.gray('Plugins are dynamically discovered from the plugins folder.'));
+    console.log(chalk.gray('Each plugin specifies its own category and configuration options.'));
+    console.log('');
+
+    // Group plugins by category
+    const pluginsByCategory = new Map<string, any[]>();
+    
+    for (const plugin of plugins) {
+      if (!pluginsByCategory.has(plugin.category)) {
+        pluginsByCategory.set(plugin.category, []);
+      }
+      pluginsByCategory.get(plugin.category)!.push(plugin);
+    }
+
+    // Display plugins by category
+    for (const [category, categoryPlugins] of pluginsByCategory) {
+      console.log(chalk.cyan(`\n${this.getCategoryEmoji(category)} ${category.toUpperCase()}:`));
+      categoryPlugins.forEach((plugin, index) => {
+        console.log(chalk.white(`  ${index + 1}. ${plugin.name} v${plugin.version}`));
+        console.log(chalk.gray(`     ${plugin.description}`));
+        if (plugin.getConfigMenu) {
+          console.log(chalk.green(`     ✅ Has configuration options`));
+        }
+      });
+    }
+
+    console.log(chalk.yellow('\n💡 Note: Plugin configuration is now handled within each plugin.'));
+    console.log(chalk.yellow('   To configure a plugin, edit its configuration options directly in the plugin file.'));
+  }
+
+  private getCategoryEmoji(category: string): string {
+    switch (category) {
+      case 'git':
+        return '🔧';
+      case 'communication':
+        return '💬';
+      case 'build':
+        return '🏗️';
+      case 'release':
+        return '🚀';
+      case 'utility':
+        return '🛠️';
+      case 'custom':
+        return '🎯';
+      default:
+        return '📦';
     }
   }
 }

@@ -1,4 +1,10 @@
-import { Repository, AutomationConfig, BaseBranches, PluginConfig, EnvironmentConfig, IntegrationConfig } from '../types';
+import { 
+  Repository, 
+  AutomationConfig, 
+  BaseBranches, 
+  EnvironmentConfig, 
+  IntegrationConfig
+} from '../types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as yaml from 'yaml';
@@ -15,7 +21,6 @@ export class ConfigManager {
   private getDefaultConfig(): AutomationConfig {
     return {
       repositories: [],
-      plugins: [],
       environments: [
         {
           name: 'development',
@@ -103,30 +108,6 @@ export class ConfigManager {
     }
   }
 
-  // Plugin management
-  getPlugins(): PluginConfig[] {
-    return this.config.plugins;
-  }
-
-  addPlugin(plugin: PluginConfig): void {
-    const existingIndex = this.config.plugins.findIndex(p => p.name === plugin.name);
-    if (existingIndex >= 0) {
-      this.config.plugins[existingIndex] = plugin;
-    } else {
-      this.config.plugins.push(plugin);
-    }
-  }
-
-  removePlugin(pluginName: string): boolean {
-    const initialLength = this.config.plugins.length;
-    this.config.plugins = this.config.plugins.filter(p => p.name !== pluginName);
-    return this.config.plugins.length < initialLength;
-  }
-
-  getPlugin(pluginName: string): PluginConfig | undefined {
-    return this.config.plugins.find(p => p.name === pluginName);
-  }
-
   // Environment management
   getEnvironments(): EnvironmentConfig[] {
     return this.config.environments;
@@ -191,28 +172,19 @@ export class ConfigManager {
     console.log('\n📁 Configured Repositories:');
     console.log('==========================');
     this.config.repositories.forEach((repo, index) => {
-      const lastUsed = repo.lastUsed ? ` (Last used: ${repo.lastUsed.toLocaleDateString()})` : '';
-      console.log(`${index + 1}. ${repo.name} - ${repo.path}${lastUsed}`);
+      let lastUsedText = '';
+      if (repo.lastUsed) {
+        // Handle both Date objects and string dates
+        const lastUsedDate = repo.lastUsed instanceof Date ? repo.lastUsed : new Date(repo.lastUsed);
+        lastUsedText = ` (Last used: ${lastUsedDate.toLocaleDateString()})`;
+      }
+      console.log(`${index + 1}. ${repo.name} - ${repo.path}${lastUsedText}`);
       if (repo.type) console.log(`   Type: ${repo.type}`);
       if (repo.url) console.log(`   URL: ${repo.url}`);
     });
   }
 
-  listPlugins(): void {
-    if (this.config.plugins.length === 0) {
-      console.log('No plugins configured.');
-      return;
-    }
-
-    console.log('\n🔌 Configured Plugins:');
-    console.log('======================');
-    this.config.plugins.forEach((plugin, index) => {
-      const status = plugin.enabled ? '✅ Enabled' : '❌ Disabled';
-      console.log(`${index + 1}. ${plugin.name} - ${status}`);
-    });
-  }
-
-  listEnvironments(): void {
+    listEnvironments(): void {
     if (this.config.environments.length === 0) {
       console.log('No environments configured.');
       return;
@@ -252,25 +224,6 @@ export class ConfigManager {
       }
     });
 
-    // Add sample plugins
-    this.addPlugin({
-      name: 'git-clone',
-      enabled: true,
-      settings: { defaultBranch: 'main' }
-    });
-
-    this.addPlugin({
-      name: 'slack-notification',
-      enabled: true,
-      settings: { defaultChannel: '#general' }
-    });
-
-    this.addPlugin({
-      name: 'java-build',
-      enabled: true,
-      settings: { mavenCommand: 'mvn clean install' }
-    });
-
     // Add sample integrations
     this.updateIntegrations({
       slack: {
@@ -284,6 +237,6 @@ export class ConfigManager {
     });
 
     await this.saveConfig();
-    console.log('✅ Sample configuration created with example repositories, plugins, and integrations');
+    console.log('✅ Sample configuration created with example repositories and integrations');
   }
 }

@@ -17,6 +17,86 @@ repositories:
       production: master
       type: standard
     lastUsed: 2025-09-03T19:23:38.054Z
+  - name: aca
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\aca
+    type: git
+    url: https://github.com/asiainspection/aca.git
+    lastUsed: 2025-09-04T14:40:20.953Z
+  - name: commons
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\commons
+    type: git
+    url: https://github.com/asiainspection/commons.git
+    lastUsed: 2025-09-04T14:40:20.954Z
+  - name: file-service-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\file-service-cloud
+    type: git
+    url: https://github.com/asiainspection/file-service-cloud.git
+    lastUsed: 2025-09-04T14:40:20.954Z
+  - name: food-certification-app
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\food-certification-app
+    type: git
+    url: https://github.com/asiainspection/food-certification-app.git
+    lastUsed: 2025-09-04T14:40:20.954Z
+  - name: food-certification-service-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\food-certification-service-cloud
+    type: git
+    url: https://github.com/asiainspection/food-certification-service-cloud.git
+    lastUsed: 2025-09-04T14:40:20.955Z
+  - name: irp-service
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\irp-service
+    type: git
+    url: https://github.com/asiainspection/irp-service.git
+    lastUsed: 2025-09-04T14:40:20.955Z
+  - name: irp-service-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\irp-service-cloud
+    type: git
+    url: https://github.com/asiainspection/irp-service-cloud.git
+    lastUsed: 2025-09-04T14:40:20.956Z
+  - name: Oracle_Master
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\Oracle_Master
+    type: git
+    url: https://github.com/asiainspection/Oracle_Master.git
+    lastUsed: 2025-09-04T14:40:20.956Z
+  - name: parameter-service-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\parameter-service-cloud
+    type: git
+    url: https://github.com/asiainspection/parameter-service-cloud.git
+    lastUsed: 2025-09-04T14:40:20.956Z
+  - name: parameter-service-legacy-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\parameter-service-legacy-cloud
+    type: git
+    url: https://github.com/asiainspection/parameter-service-legacy-cloud.git
+    lastUsed: 2025-09-04T14:40:20.956Z
+  - name: parameter-web-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\parameter-web-cloud
+    type: git
+    url: https://github.com/asiainspection/parameter-web-cloud.git
+    lastUsed: 2025-09-04T14:40:20.957Z
+  - name: psi
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\psi
+    type: git
+    url: https://github.com/asiainspection/psi.git
+    lastUsed: 2025-09-04T14:40:20.957Z
+  - name: psi-web-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\psi-web-cloud
+    type: git
+    url: https://github.com/asiainspection/psi-web-cloud.git
+    lastUsed: 2025-09-04T14:40:20.957Z
+  - name: Public-API
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\Public-API
+    type: git
+    url: https://github.com/asiainspection/Public-API.git
+    lastUsed: 2025-09-04T14:40:20.958Z
+  - name: customer-service
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\customer-service
+    type: git
+    url: https://github.com/asiainspection/customer-service.git
+    lastUsed: 2025-09-04T14:40:20.958Z
+  - name: back-office-cloud
+    path: C:\Users\Gyowanny Queiroz\IdeaProjects\back-office-cloud
+    type: git
+    url: https://github.com/asiainspection/back-office-cloud.git
+    lastUsed: 2025-09-04T14:40:20.958Z
 plugins:
   - name: git-clone
     enabled: true

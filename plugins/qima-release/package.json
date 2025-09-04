@@ -1,0 +1,13 @@
+{
+  "name": "at2-qima-release-plugin",
+  "version": "1.0.0",
+  "description": "QIMA Release plugin for AT2 automation CLI",
+  "main": "index.js",
+  "keywords": ["at2", "plugin", "qima", "release", "deployment", "git"],
+  "author": "Development Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.12"
+  }
+}
